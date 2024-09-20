@@ -1,101 +1,159 @@
-import Image from "next/image";
+'use client'
+
+import * as React from 'react'
+import { Button } from "@/components/ui/button";
+import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { useForm } from '@tanstack/react-form'
+import { zodValidator } from '@tanstack/zod-form-adapter'
+import { z } from 'zod'
+import type { FieldApi } from '@tanstack/react-form'
+import { useToast } from "@/hooks/use-toast"
+
+/* eslint-disable  @typescript-eslint/no-explicit-any */
+function FieldInfo({ field }: { field: FieldApi<any, any, any, any> }) {
+  return (
+    <div className="min-h-[20px] text-xs">
+      {field.state.meta.isTouched && field.state.meta.errors.length ? (
+        <p className="text-red-500">{field.state.meta.errors[0]}</p>
+      ) : field.state.meta.isValidating ? (
+        <p className="text-blue-500">Validating...</p>
+      ) : null}
+    </div>
+  )
+}
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="https://nextjs.org/icons/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+  const { toast } = useToast()
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+  const form = useForm({
+    defaultValues: {
+      firstName: '',
+      lastName: '',
+      email: '',
+    },
+    onSubmit: async ({ value }) => {
+      // Do something with form data
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      console.log('Form submitted:', value);
+      toast({
+        title: "Success",
+        description: "Form submitted successfully!",
+      })
+    },
+    validatorAdapter: zodValidator(),
+  })
+
+  return (
+    <div className="container mx-auto p-4">
+      <Card className="w-full max-w-md mx-auto">
+        <CardHeader>
+          <CardTitle>User Registration</CardTitle>
+          <CardDescription>Please fill out the form below to register.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form
+            onSubmit={(e) => {
+              e.preventDefault()
+              e.stopPropagation()
+              form.handleSubmit()
+            }}
           >
-            <Image
-              className="dark:invert"
-              src="https://nextjs.org/icons/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+            <div className="space-y-4">
+              <form.Field
+                name="firstName"
+                validators={{
+                  onChange: z
+                    .string()
+                    .min(3, 'First name must be at least 3 characters'),
+                  onChangeAsyncDebounceMs: 500,
+                  onChangeAsync: z.string().refine(
+                    async (value) => {
+                      await new Promise((resolve) => setTimeout(resolve, 1000))
+                      return !value.includes('error')
+                    },
+                    {
+                      message: "No 'error' allowed in first name",
+                    },
+                  ),
+                }}
+              >
+                {(field) => (
+                  <div className="space-y-1">
+                    <Label htmlFor={field.name}>First Name</Label>
+                    <Input
+                      id={field.name}
+                      name={field.name}
+                      value={field.state.value}
+                      onBlur={field.handleBlur}
+                      onChange={(e) => field.handleChange(e.target.value)}
+                    />
+                    <FieldInfo field={field} />
+                  </div>
+                )}
+              </form.Field>
+
+              <form.Field
+                name="lastName"
+                validators={{
+                  onChange: z
+                    .string()
+                    .min(2, 'Last name must be at least 2 characters'),
+                }}
+              >
+                {(field) => (
+                  <div className="space-y-1">
+                    <Label htmlFor={field.name}>Last Name</Label>
+                    <Input
+                      id={field.name}
+                      name={field.name}
+                      value={field.state.value}
+                      onBlur={field.handleBlur}
+                      onChange={(e) => field.handleChange(e.target.value)}
+                    />
+                    <FieldInfo field={field} />
+                  </div>
+                )}
+              </form.Field>
+
+              <form.Field
+                name="email"
+                validators={{
+                  onChange: z.string().email('Invalid email address'),
+                }}
+              >
+                {(field) => (
+                  <div className="space-y-1">
+                    <Label htmlFor={field.name}>Email</Label>
+                    <Input
+                      id={field.name}
+                      name={field.name}
+                      type="email"
+                      value={field.state.value}
+                      onBlur={field.handleBlur}
+                      onChange={(e) => field.handleChange(e.target.value)}
+                    />
+                    <FieldInfo field={field} />
+                  </div>
+                )}
+              </form.Field>
+            </div>
+
+            <CardFooter className="flex justify-end mt-6">
+              <form.Subscribe
+                selector={(state) => [state.canSubmit, state.isSubmitting]}
+              >
+                {([canSubmit, isSubmitting]) => (
+                  <Button type="submit" disabled={!canSubmit}>
+                    {isSubmitting ? 'Submitting...' : 'Register'}
+                  </Button>
+                )}
+              </form.Subscribe>
+            </CardFooter>
+          </form>
+        </CardContent>
+      </Card>
     </div>
-  );
+  )
 }
